@@ -16,7 +16,9 @@ Puppet::Type.type(:group).provide :groupadd, :parent => Puppet::Provider::NameSe
 
   optional_commands :localadd => "lgroupadd", :localdelete => "lgroupdel", :localmodify => "lgroupmod"
 
-  has_feature :libuser if Puppet.features.libuser?
+  has_feature :libuser, :manages_members if Puppet.features.libuser?
+
+  options :members, :flag => '-M', :method => :mem
 
   def exists?
     return !!localgid if @resource.forcelocal?
@@ -85,13 +87,18 @@ Puppet::Type.type(:group).provide :groupadd, :parent => Puppet::Provider::NameSe
     cmd
   end
 
+  def purge_members
+    localmodify('-m', members.join(','), @resource.name)
+  end
+
   def modifycmd(param, value)
-    if @resource.forcelocal?
+    if @resource.forcelocal? || @resource.should(:members)
       cmd = [command(:localmodify)]
       @custom_environment = Puppet::Util::Libuser.getenv
     else
       cmd = [command(:modify)]
     end
+    purge_members if param == :members && @resource[:auth_membership]
     cmd << flag(param) << value
     # TODO the group type only really manages gid, so there are currently no
     # tests for this behavior
