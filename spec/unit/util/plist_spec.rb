@@ -132,6 +132,13 @@ describe Puppet::Util::Plist, :if => Puppet.features.cfpropertylist? do
       expect(subject.parse_plist(valid_xml_plist)).to eq(valid_xml_plist_hash)
     end
 
+    it "forces UTF-8 encoding on an ASCII XML plist" do
+      ascii_xml_plist = '<?xml version="1.0" encoding="UTF-8"?>'.encode(Encoding::US_ASCII)
+      expect(ascii_xml_plist).to receive(:force_encoding).with(Encoding::UTF_8)
+
+      subject.parse_plist(ascii_xml_plist)
+    end
+
     it "raises a debug message and replaces a bad XML plist doctype should one be encountered" do
       expect(subject).to receive(:new_cfpropertylist).with({:data => good_xml_doctype}).and_return('plist_object')
       allow(subject).to receive(:convert_cfpropertylist_to_native_types).with('plist_object')
