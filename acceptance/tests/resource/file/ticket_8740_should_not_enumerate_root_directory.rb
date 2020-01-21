@@ -10,6 +10,8 @@ require 'puppet/acceptance/common_utils'
 extend Puppet::Acceptance::CommandUtils
 
 agents.each do |agent|
+  target.prepend('/private') if agent.platform =~ /^osx-/  # / is read-only beginning with 10.15
+
   step "clean up the system before we begin"
   on(agent, "rm -f #{target}")
 
