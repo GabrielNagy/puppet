@@ -196,6 +196,8 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
       case @resource[:ensure]
       when String
         command_options << "#{@resource[:name]}==#{@resource[:ensure]}"
+      when SemanticPuppet::VersionRange
+        command_options << "#{@resource[:name]}#{munge_semver_range(@resource[:ensure].ranges)}"
       when :latest
         command_options << "--upgrade" << @resource[:name]
       else
@@ -224,6 +226,31 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
 
   def install_options
     join_options(@resource[:install_options])
+  end
+
+  def insync?(is)
+    return false unless is && is != :absent
+
+    should = resource[:ensure]
+
+    if should.is_a?(SemanticPuppet::VersionRange)
+      should.include?(SemanticPuppet::Version.parse(is))
+    end
+  end
+
+  def munge_semver_range(ranges)
+    if ranges.length > 1
+      Puppet.warning _("More than one version range specified for package %{resource_name}, defaulting to the first one") % { resource_name: @resource.name }
+    end
+
+    range = ranges.first
+
+    if range.is_a?(SemanticPuppet::VersionRange::MinMaxRange)
+      # pip requires min/max ranges to be separated by a comma
+      range.to_s.tr(' ', ',')
+    else
+      range.to_s
+    end
   end
 
   def self.quote(path)

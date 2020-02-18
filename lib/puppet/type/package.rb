@@ -139,6 +139,16 @@ module Puppet
         end
       end
 
+      munge do |value|
+        if value =~ /[<>=~]/
+          begin
+            SemanticPuppet::VersionRange.parse(value)
+          rescue ArgumentError
+            value
+          end
+        end
+      end
+
       defaultto :installed
 
       # Override the parent method, because we've got all kinds of
