@@ -56,6 +56,11 @@ module Puppet
         other package dependencies unless explicit action is taken by
         a user or another package.",
       :methods => [:hold, :unhold]
+    feature :version_ranges, "The provider can ensure a valid semantic version range
+        i.e. `ensure => '>= 2.1.0 < 4'`
+
+        If a version that satsfies the range already exists, no action will be taken.",
+      :methods => [:install_version_range]
     feature :install_only, "The provider accepts options to only install packages never update (kernels, etc.)"
     feature :install_options, "The provider accepts options to be
       passed to the installer command."
@@ -119,6 +124,21 @@ module Puppet
         end
 
         if current == :absent
+          :package_installed
+        else
+          :package_changed
+        end
+      end
+
+      newvalue(/[<>=~]/, :required_features => :version_ranges) do
+        # This has to happen before the /./ matcher below so we catch version ranges first
+        begin
+          provider.install_version_range
+        rescue => detail
+          self.fail Puppet::Error, _("Could not update: %{detail}") % { detail: detail }, detail
+        end
+
+        if self.retrieve == :absent
           :package_installed
         else
           :package_changed

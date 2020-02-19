@@ -11,7 +11,7 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
   This provider supports the `install_options` attribute, which allows command-line flags to be passed to pip.
   These options should be specified as an array where each element is either a string or a hash."
 
-  has_feature :installable, :uninstallable, :upgradeable, :versionable, :install_options, :targetable
+  has_feature :installable, :uninstallable, :upgradeable, :versionable, :version_ranges, :install_options, :targetable
 
   # Override the specificity method to return 1 if pip is not set as default provider
   def self.specificity
@@ -175,6 +175,36 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
     end
   end
 
+  # Install a package with a specific version range. If more than one
+  # range is specified, installations will be attempted for each
+  # range, beginning with the highest.
+
+  def install_version_range
+    command = resource_or_provider_command
+    self.class.validate_command(command)
+
+    command_options = %w{install -q}
+    command_options += install_options if @resource[:install_options]
+
+    ranges = @resource[:ensure].ranges
+    if ranges.length > 1
+      reversed_ranges = ranges.sort_by { |r| r.max.version }.reverse
+      reversed_ranges.each do |range|
+        command_options << "#{@resource[:name]}#{munge_semver_range(range)}"
+        begin
+          execute([command, command_options])
+        rescue
+          raise if range == reversed_ranges.last
+          command_options.pop
+          next
+        end
+      end
+    else
+      command_options << "#{@resource[:name]}#{munge_semver_range(ranges.first)}"
+      execute([command, command_options])
+    end
+  end
+
   # Install a package.  The ensure parameter may specify installed,
   # latest, a version number, or, in conjunction with the source
   # parameter, an SCM revision.  In that case, the source parameter
@@ -196,8 +226,6 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
       case @resource[:ensure]
       when String
         command_options << "#{@resource[:name]}==#{@resource[:ensure]}"
-      when SemanticPuppet::VersionRange
-        command_options << "#{@resource[:name]}#{munge_semver_range(@resource[:ensure].ranges)}"
       when :latest
         command_options << "--upgrade" << @resource[:name]
       else
@@ -238,13 +266,7 @@ Puppet::Type.type(:package).provide :pip, :parent => ::Puppet::Provider::Package
     end
   end
 
-  def munge_semver_range(ranges)
-    if ranges.length > 1
-      Puppet.warning _("More than one version range specified for package %{resource_name}, defaulting to the first one") % { resource_name: @resource.name }
-    end
-
-    range = ranges.first
-
+  def munge_semver_range(range)
     if range.is_a?(SemanticPuppet::VersionRange::MinMaxRange)
       # pip requires min/max ranges to be separated by a comma
       range.to_s.tr(' ', ',')
