@@ -637,5 +637,26 @@ module Puppet::FFI::Windows
     TOKEN_ALL_ACCESS = 0xF01FF
     TOKEN_QUERY = 0x0008
     ERROR_NO_SUCH_PRIVILEGE = 1313
+
+    # Puppet::Util::Windows::SID::Principal constants
+    # = 8 + max sub identifiers (15) * 4
+    MAXIMUM_SID_BYTE_LENGTH = 68
+
+    ERROR_INVALID_PARAMETER   = 87
+    ERROR_INSUFFICIENT_BUFFER = 122
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379601(v=vs.85).aspx
+    SID_NAME_USE = enum(
+      :SidTypeUser, 1,
+      :SidTypeGroup, 2,
+      :SidTypeDomain, 3,
+      :SidTypeAlias, 4,
+      :SidTypeWellKnownGroup, 5,
+      :SidTypeDeletedAccount, 6,
+      :SidTypeInvalid, 7,
+      :SidTypeUnknown, 8,
+      :SidTypeComputer, 9,
+      :SidTypeLabel, 10
+    )
   end
 end

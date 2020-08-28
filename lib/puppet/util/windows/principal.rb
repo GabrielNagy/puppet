@@ -2,7 +2,9 @@ require 'puppet/util/windows'
 
 module Puppet::Util::Windows::SID
   class Principal
-    extend FFI::Library
+    extend Puppet::FFI::Windows::Functions
+    extend Puppet::FFI::Windows::Constants
+
     attr_reader :account, :sid_bytes, :sid, :domain, :domain_account, :account_type
 
     def initialize(account, sid_bytes, sid, domain, account_type)
@@ -37,12 +39,6 @@ module Puppet::Util::Windows::SID
     def to_s
       @domain_account
     end
-
-    # = 8 + max sub identifiers (15) * 4
-    MAXIMUM_SID_BYTE_LENGTH = 68
-
-    ERROR_INVALID_PARAMETER   = 87
-    ERROR_INSUFFICIENT_BUFFER = 122
 
     def self.lookup_account_name(system_name = nil, account_name)
       system_name_ptr = FFI::Pointer::NULL
@@ -145,50 +141,6 @@ module Puppet::Util::Windows::SID
         system_name_ptr.free if system_name_ptr != FFI::Pointer::NULL
       end
     end
-
-    ffi_convention :stdcall
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379601(v=vs.85).aspx
-    SID_NAME_USE = enum(
-      :SidTypeUser, 1,
-      :SidTypeGroup, 2,
-      :SidTypeDomain, 3,
-      :SidTypeAlias, 4,
-      :SidTypeWellKnownGroup, 5,
-      :SidTypeDeletedAccount, 6,
-      :SidTypeInvalid, 7,
-      :SidTypeUnknown, 8,
-      :SidTypeComputer, 9,
-      :SidTypeLabel, 10
-    )
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379159(v=vs.85).aspx
-    # BOOL WINAPI LookupAccountName(
-    #   _In_opt_  LPCTSTR       lpSystemName,
-    #   _In_      LPCTSTR       lpAccountName,
-    #   _Out_opt_ PSID          Sid,
-    #   _Inout_   LPDWORD       cbSid,
-    #   _Out_opt_ LPTSTR        ReferencedDomainName,
-    #   _Inout_   LPDWORD       cchReferencedDomainName,
-    #   _Out_     PSID_NAME_USE peUse
-    # );
-    ffi_lib :advapi32
-    attach_function_private :LookupAccountNameW,
-      [:lpcwstr, :lpcwstr, :pointer, :lpdword, :lpwstr, :lpdword, :pointer], :win32_bool
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379166(v=vs.85).aspx
-    # BOOL WINAPI LookupAccountSid(
-    #   _In_opt_  LPCTSTR       lpSystemName,
-    #   _In_      PSID          lpSid,
-    #   _Out_opt_ LPTSTR        lpName,
-    #   _Inout_   LPDWORD       cchName,
-    #   _Out_opt_ LPTSTR        lpReferencedDomainName,
-    #   _Inout_   LPDWORD       cchReferencedDomainName,
-    #   _Out_     PSID_NAME_USE peUse
-    # );
-    ffi_lib :advapi32
-    attach_function_private :LookupAccountSidW,
-      [:lpcwstr, :pointer, :lpwstr, :lpdword, :lpwstr, :lpdword, :pointer], :win32_bool
   end
 end
 

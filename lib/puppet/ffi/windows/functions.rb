@@ -934,5 +934,33 @@ module Puppet::FFI::Windows
     ffi_lib :advapi32
     attach_function_private :LsaNtStatusToWinError,
       [:ntstatus], :ulong
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379159(v=vs.85).aspx
+    # BOOL WINAPI LookupAccountName(
+    #   _In_opt_  LPCTSTR       lpSystemName,
+    #   _In_      LPCTSTR       lpAccountName,
+    #   _Out_opt_ PSID          Sid,
+    #   _Inout_   LPDWORD       cbSid,
+    #   _Out_opt_ LPTSTR        ReferencedDomainName,
+    #   _Inout_   LPDWORD       cchReferencedDomainName,
+    #   _Out_     PSID_NAME_USE peUse
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LookupAccountNameW,
+      [:lpcwstr, :lpcwstr, :pointer, :lpdword, :lpwstr, :lpdword, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379166(v=vs.85).aspx
+    # BOOL WINAPI LookupAccountSid(
+    #   _In_opt_  LPCTSTR       lpSystemName,
+    #   _In_      PSID          lpSid,
+    #   _Out_opt_ LPTSTR        lpName,
+    #   _Inout_   LPDWORD       cchName,
+    #   _Out_opt_ LPTSTR        lpReferencedDomainName,
+    #   _Inout_   LPDWORD       cchReferencedDomainName,
+    #   _Out_     PSID_NAME_USE peUse
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LookupAccountSidW,
+      [:lpcwstr, :pointer, :lpwstr, :lpdword, :lpwstr, :lpdword, :pointer], :win32_bool
   end
 end
