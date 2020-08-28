@@ -771,5 +771,20 @@ module Puppet::FFI::Windows
     ffi_lib :advapi32
     attach_function_private :ReportEventW,
       [:handle, :word, :word, :dword, :lpvoid, :word, :dword, :lpvoid, :lpvoid], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms679351(v=vs.85).aspx
+    # DWORD WINAPI FormatMessage(
+    #   _In_      DWORD dwFlags,
+    #   _In_opt_  LPCVOID lpSource,
+    #   _In_      DWORD dwMessageId,
+    #   _In_      DWORD dwLanguageId,
+    #   _Out_     LPTSTR lpBuffer,
+    #   _In_      DWORD nSize,
+    #   _In_opt_  va_list *Arguments
+    # );
+    # NOTE: since we're not preallocating the buffer, use a :pointer for lpBuffer
+    ffi_lib :kernel32
+    attach_function_private :FormatMessageW,
+      [:dword, :lpcvoid, :dword, :dword, :pointer, :dword, :pointer], :dword
   end
 end

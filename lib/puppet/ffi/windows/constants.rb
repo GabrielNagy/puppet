@@ -102,6 +102,7 @@ module Puppet::FFI::Windows
 
     ERROR_FILE_NOT_FOUND = 2
     ERROR_PATH_NOT_FOUND = 3
+    ERROR_ACCESS_DENIED  = 5
     ERROR_ALREADY_EXISTS = 183
 
     # https://msdn.microsoft.com/en-us/library/windows/desktop/aa364571(v=vs.85).aspx
@@ -437,5 +438,12 @@ module Puppet::FFI::Windows
     # we can reference them in tests.
     NULL_HANDLE = 0
     WIN32_FALSE = 0
+
+    # Puppet::Util::Windows::Error class constants
+    FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100
+    FORMAT_MESSAGE_IGNORE_INSERTS  = 0x00000200
+    FORMAT_MESSAGE_FROM_SYSTEM     = 0x00001000
+    FORMAT_MESSAGE_ARGUMENT_ARRAY  = 0x00002000
+    FORMAT_MESSAGE_MAX_WIDTH_MASK  = 0x000000FF
   end
 end

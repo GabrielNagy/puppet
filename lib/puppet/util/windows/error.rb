@@ -3,8 +3,8 @@ require 'puppet/error'
 
 # represents an error resulting from a Win32 error code
 class Puppet::Util::Windows::Error < Puppet::Error
-  require 'ffi'
-  extend FFI::Library
+  extend Puppet::FFI::Windows::Functions
+  extend Puppet::FFI::Windows::Constants
 
   attr_reader :code
 
@@ -55,30 +55,4 @@ class Puppet::Util::Windows::Error < Puppet::Error
 
     error_string
   end
-
-  ERROR_FILE_NOT_FOUND      = 2
-  ERROR_ACCESS_DENIED       = 5
-
-  FORMAT_MESSAGE_ALLOCATE_BUFFER   = 0x00000100
-  FORMAT_MESSAGE_IGNORE_INSERTS    = 0x00000200
-  FORMAT_MESSAGE_FROM_SYSTEM       = 0x00001000
-  FORMAT_MESSAGE_ARGUMENT_ARRAY    = 0x00002000
-  FORMAT_MESSAGE_MAX_WIDTH_MASK    = 0x000000FF
-
-  ffi_convention :stdcall
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/ms679351(v=vs.85).aspx
-  # DWORD WINAPI FormatMessage(
-  #   _In_      DWORD dwFlags,
-  #   _In_opt_  LPCVOID lpSource,
-  #   _In_      DWORD dwMessageId,
-  #   _In_      DWORD dwLanguageId,
-  #   _Out_     LPTSTR lpBuffer,
-  #   _In_      DWORD nSize,
-  #   _In_opt_  va_list *Arguments
-  # );
-  # NOTE: since we're not preallocating the buffer, use a :pointer for lpBuffer
-  ffi_lib :kernel32
-  attach_function_private :FormatMessageW,
-    [:dword, :lpcvoid, :dword, :dword, :pointer, :dword, :pointer], :dword
 end
