@@ -623,5 +623,19 @@ module Puppet::FFI::Windows
       :WinCapabilityEnterpriseAuthenticationSid     , 93,
       :WinCapabilityRemovableStorageSid             , 94
     )
+
+    # Puppet::Util::Windows::Process constants
+    WAIT_TIMEOUT = 0x102
+    WAIT_INTERVAL = 200
+    # https://docs.microsoft.com/en-us/windows/desktop/ProcThread/process-creation-flags
+    CREATE_NO_WINDOW = 0x08000000
+    # https://docs.microsoft.com/en-us/windows/desktop/ProcThread/process-security-and-access-rights
+    PROCESS_QUERY_INFORMATION = 0x0400
+    # https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file#maximum-path-length-limitation
+    MAX_PATH_LENGTH = 32767
+
+    TOKEN_ALL_ACCESS = 0xF01FF
+    TOKEN_QUERY = 0x0008
+    ERROR_NO_SUCH_PRIVILEGE = 1313
   end
 end

@@ -2,19 +2,11 @@ require 'puppet/util/windows/monkey_patches/process'
 require 'puppet/ffi/windows'
 
 module Puppet::Util::Windows::Process
-  extend Puppet::FFI::Windows::Functions
   include Puppet::FFI::Windows::Structs
-  extend Puppet::Util::Windows::String
-  extend FFI::Library
+  extend Puppet::FFI::Windows::Functions
+  extend Puppet::FFI::Windows::Constants
 
-  WAIT_TIMEOUT = 0x102
-  WAIT_INTERVAL = 200
-  # https://docs.microsoft.com/en-us/windows/desktop/ProcThread/process-creation-flags
-  CREATE_NO_WINDOW = 0x08000000
-  # https://docs.microsoft.com/en-us/windows/desktop/ProcThread/process-security-and-access-rights
-  PROCESS_QUERY_INFORMATION = 0x0400
-  # https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file#maximum-path-length-limitation
-  MAX_PATH_LENGTH = 32767
+  extend Puppet::Util::Windows::String
 
   def execute(command, arguments, stdin, stdout, stderr)
     create_args = {
@@ -220,8 +212,6 @@ module Puppet::Util::Windows::Process
   end
   module_function :parse_token_information_as_token_elevation
 
-  TOKEN_ALL_ACCESS = 0xF01FF
-  ERROR_NO_SUCH_PRIVILEGE = 1313
   def process_privilege_symlink?
     privilege_symlink = false
     handle = get_current_process
@@ -244,7 +234,6 @@ module Puppet::Util::Windows::Process
   end
   module_function :process_privilege_symlink?
 
-  TOKEN_QUERY = 0x0008
   # Returns whether or not the owner of the current process is running
   # with elevated security privileges.
   #
@@ -361,5 +350,4 @@ module Puppet::Util::Windows::Process
     windows_major_version >= 6
   end
   module_function :supports_elevated_security?
-
 end
