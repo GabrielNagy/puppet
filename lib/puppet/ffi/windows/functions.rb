@@ -738,5 +738,38 @@ module Puppet::FFI::Windows
     # );
     ffi_lib :advapi32
     attach_function_private :GetLengthSid, [:pointer], :dword
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363678(v=vs.85).aspx
+    # HANDLE RegisterEventSource(
+    # _In_ LPCTSTR lpUNCServerName,
+    # _In_ LPCTSTR lpSourceName
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegisterEventSourceW,
+      [:buffer_in, :buffer_in], :handle
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363642(v=vs.85).aspx
+    # BOOL DeregisterEventSource(
+    # _Inout_ HANDLE hEventLog
+    # );
+    ffi_lib :advapi32
+    attach_function_private :DeregisterEventSource,
+      [:handle], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363679(v=vs.85).aspx
+    # BOOL ReportEvent(
+    #   _In_ HANDLE  hEventLog,
+    #   _In_ WORD    wType,
+    #   _In_ WORD    wCategory,
+    #   _In_ DWORD   dwEventID,
+    #   _In_ PSID    lpUserSid,
+    #   _In_ WORD    wNumStrings,
+    #   _In_ DWORD   dwDataSize,
+    #   _In_ LPCTSTR *lpStrings,
+    #   _In_ LPVOID  lpRawData
+    # );
+    ffi_lib :advapi32
+    attach_function_private :ReportEventW,
+      [:handle, :word, :word, :dword, :lpvoid, :word, :dword, :lpvoid, :lpvoid], :win32_bool
   end
 end

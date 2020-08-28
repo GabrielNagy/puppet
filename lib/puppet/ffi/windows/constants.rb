@@ -425,5 +425,17 @@ module Puppet::FFI::Windows
 
     # https://stackoverflow.com/a/1792930 - 68 bytes, 184 characters in a string
     MAXIMUM_SID_STRING_LENGTH = 184
+
+    # Puppet::Util::Windows::EventLog class constants
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363679(v=vs.85).aspx
+    EVENTLOG_ERROR_TYPE       = 0x0001
+    EVENTLOG_WARNING_TYPE     = 0x0002
+    EVENTLOG_INFORMATION_TYPE = 0x0004
+
+    # These are duplicate definitions from Puppet::Util::Windows::ApiTypes,
+    # established here so this class can be standalone from Puppet, and public so
+    # we can reference them in tests.
+    NULL_HANDLE = 0
+    WIN32_FALSE = 0
   end
 end

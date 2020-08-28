@@ -1,4 +1,4 @@
-require 'ffi'
+require 'puppet/ffi/windows'
 
 # Puppet::Util::Windows::EventLog needs to be requirable without having loaded
 # any other parts of Puppet so it can be leveraged independently by the code
@@ -11,19 +11,11 @@ require 'ffi'
 module Puppet; module Util; module Windows ; end ; end ; end
 
 class Puppet::Util::Windows::EventLog
-  extend FFI::Library
+  include Puppet::FFI::Windows::Functions
+  include Puppet::FFI::Windows::Constants
 
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363679(v=vs.85).aspx
-  EVENTLOG_ERROR_TYPE       = 0x0001
-  EVENTLOG_WARNING_TYPE     = 0x0002
-  EVENTLOG_INFORMATION_TYPE = 0x0004
-
-  # These are duplicate definitions from Puppet::Util::Windows::ApiTypes,
-  # established here so this class can be standalone from Puppet, and public so
-  # we can reference them in tests.
-  NULL_HANDLE = 0
-  WIN32_FALSE = 0
-
+  extend Puppet::FFI::Windows::Functions
+  extend Puppet::FFI::Windows::Constants
   # Register an event log handle for the application
   # @param source_name [String] the name of the event source to retrieve a handle for
   # @return [void]
@@ -140,48 +132,4 @@ class Puppet::Util::Windows::EventLog
     # ptr has already had free called, so nothing to return
     nil
   end
-
-  ffi_convention :stdcall
-
-  # The following are typedefs in Puppet::Util::Winodws::ApiTypes, but here we
-  # use their original FFI counterparts:
-  # :uintptr_t for :handle
-  # :int32 for :win32_bool
-  # :uint16 for :word
-  # :uint32 for :dword
-  # :pointer for :lpvoid
-  # :uchar for :byte
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363678(v=vs.85).aspx
-  # HANDLE RegisterEventSource(
-  # _In_ LPCTSTR lpUNCServerName,
-  # _In_ LPCTSTR lpSourceName
-  # );
-  ffi_lib :advapi32
-  attach_function :RegisterEventSourceW, [:buffer_in, :buffer_in], :uintptr_t
-  private :RegisterEventSourceW
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363642(v=vs.85).aspx
-  # BOOL DeregisterEventSource(
-  # _Inout_ HANDLE hEventLog
-  # );
-  ffi_lib :advapi32
-  attach_function :DeregisterEventSource, [:uintptr_t], :int32
-  private :DeregisterEventSource
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363679(v=vs.85).aspx
-  # BOOL ReportEvent(
-  #   _In_ HANDLE  hEventLog,
-  #   _In_ WORD    wType,
-  #   _In_ WORD    wCategory,
-  #   _In_ DWORD   dwEventID,
-  #   _In_ PSID    lpUserSid,
-  #   _In_ WORD    wNumStrings,
-  #   _In_ DWORD   dwDataSize,
-  #   _In_ LPCTSTR *lpStrings,
-  #   _In_ LPVOID  lpRawData
-  # );
-  ffi_lib :advapi32
-  attach_function :ReportEventW, [:uintptr_t, :uint16, :uint16, :uint32, :pointer, :uint16, :uint32, :pointer, :pointer], :int32
-  private :ReportEventW
 end
