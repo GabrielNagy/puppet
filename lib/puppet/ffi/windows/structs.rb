@@ -334,5 +334,59 @@ module Puppet::FFI::Windows
         FFI::Type::ULONG.size + FFI::Type::USHORT.size + FFI::Type::USHORT.size
       end
     end
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb773378(v=vs.85).aspx
+    # typedef struct _PROFILEINFO {
+    #   DWORD  dwSize;
+    #   DWORD  dwFlags;
+    #   LPTSTR lpUserName;
+    #   LPTSTR lpProfilePath;
+    #   LPTSTR lpDefaultPath;
+    #   LPTSTR lpServerName;
+    #   LPTSTR lpPolicyPath;
+    #   HANDLE hProfile;
+    # } PROFILEINFO, *LPPROFILEINFO;
+    # technically
+    # NOTE: that for structs, buffer_* (lptstr alias) cannot be used
+    class PROFILEINFO < FFI::Struct
+      layout :dwSize, :dword,
+             :dwFlags, :dword,
+             :lpUserName, :pointer,
+             :lpProfilePath, :pointer,
+             :lpDefaultPath, :pointer,
+             :lpServerName, :pointer,
+             :lpPolicyPath, :pointer,
+             :hProfile, :handle
+    end
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/lsalookup/ns-lsalookup-lsa_object_attributes
+    # typedef struct _LSA_OBJECT_ATTRIBUTES {
+    #   ULONG               Length;
+    #   HANDLE              RootDirectory;
+    #   PLSA_UNICODE_STRING ObjectName;
+    #   ULONG               Attributes;
+    #   PVOID               SecurityDescriptor;
+    #   PVOID               SecurityQualityOfService;
+    # } LSA_OBJECT_ATTRIBUTES, *PLSA_OBJECT_ATTRIBUTES;
+    class LSA_OBJECT_ATTRIBUTES < FFI::Struct
+      layout :Length, :ulong,
+        :RootDirectory, :handle,
+        :ObjectName, :plsa_unicode_string,
+        :Attributes, :ulong,
+        :SecurityDescriptor, :pvoid,
+        :SecurityQualityOfService, :pvoid
+    end
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/lsalookup/ns-lsalookup-lsa_unicode_string
+    # typedef struct _LSA_UNICODE_STRING {
+    #   USHORT Length;
+    #   USHORT MaximumLength;
+    #   PWSTR  Buffer;
+    # } LSA_UNICODE_STRING, *PLSA_UNICODE_STRING;
+    class LSA_UNICODE_STRING < FFI::Struct
+      layout :Length, :ushort,
+        :MaximumLength, :ushort,
+        :Buffer, :pwstr
+    end
   end
 end

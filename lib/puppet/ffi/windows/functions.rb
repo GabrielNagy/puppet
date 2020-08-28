@@ -804,5 +804,135 @@ module Puppet::FFI::Windows
     ffi_lib :advapi32
     attach_function_private :GetUserNameW,
       [:lpwstr, :lpdword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa378184(v=vs.85).aspx
+    # BOOL LogonUser(
+    #   _In_      LPTSTR lpszUsername,
+    #   _In_opt_  LPTSTR lpszDomain,
+    #   _In_opt_  LPTSTR lpszPassword,
+    #   _In_      DWORD dwLogonType,
+    #   _In_      DWORD dwLogonProvider,
+    #   _Out_     PHANDLE phToken
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LogonUserW,
+      [:lpwstr, :lpwstr, :lpwstr, :dword, :dword, :phandle], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762281(v=vs.85).aspx
+    # BOOL WINAPI LoadUserProfile(
+    #   _In_     HANDLE hToken,
+    #   _Inout_  LPPROFILEINFO lpProfileInfo
+    # );
+    ffi_lib :userenv
+    attach_function_private :LoadUserProfileW,
+      [:handle, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762282(v=vs.85).aspx
+    # BOOL WINAPI UnloadUserProfile(
+    #   _In_  HANDLE hToken,
+    #   _In_  HANDLE hProfile
+    # );
+    ffi_lib :userenv
+    attach_function_private :UnloadUserProfile,
+      [:handle, :handle], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376389(v=vs.85).aspx
+    # BOOL WINAPI CheckTokenMembership(
+    #   _In_opt_  HANDLE TokenHandle,
+    #   _In_      PSID SidToCheck,
+    #   _Out_     PBOOL IsMember
+    # );
+    ffi_lib :advapi32
+    attach_function_private :CheckTokenMembership,
+      [:handle, :pointer, :pbool], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446585(v=vs.85).aspx
+    # BOOL WINAPI CreateWellKnownSid(
+    #   _In_       WELL_KNOWN_SID_TYPE WellKnownSidType,
+    #   _In_opt_   PSID DomainSid,
+    #   _Out_opt_  PSID pSid,
+    #   _Inout_    DWORD *cbSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :CreateWellKnownSid,
+      [WELL_KNOWN_SID_TYPE, :pointer, :pointer, :lpdword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379151(v=vs.85).aspx
+    # BOOL WINAPI IsValidSid(
+    #   _In_  PSID pSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :IsValidSid,
+      [:pointer], :win32_bool
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaenumerateaccountrights
+    # https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/user-rights-assignment
+    # NTSTATUS LsaEnumerateAccountRights(
+    #   LSA_HANDLE          PolicyHandle,
+    #   PSID                AccountSid,
+    #   PLSA_UNICODE_STRING *UserRights,
+    #   PULONG              CountOfRights
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaEnumerateAccountRights,
+      [:lsa_handle, :psid, :plsa_unicode_string, :pulong], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaaddaccountrights
+    # NTSTATUS LsaAddAccountRights(
+    #   LSA_HANDLE          PolicyHandle,
+    #   PSID                AccountSid,
+    #   PLSA_UNICODE_STRING UserRights,
+    #   ULONG               CountOfRights
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaAddAccountRights,
+      [:lsa_handle, :psid, :plsa_unicode_string, :ulong], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaremoveaccountrights
+    # NTSTATUS LsaRemoveAccountRights(
+    #   LSA_HANDLE          PolicyHandle,
+    #   PSID                AccountSid,
+    #   BOOLEAN             AllRights,
+    #   PLSA_UNICODE_STRING UserRights,
+    #   ULONG               CountOfRights
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaRemoveAccountRights,
+      [:lsa_handle, :psid, :bool, :plsa_unicode_string, :ulong], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaopenpolicy
+    # NTSTATUS LsaOpenPolicy(
+    #   PLSA_UNICODE_STRING    SystemName,
+    #   PLSA_OBJECT_ATTRIBUTES ObjectAttributes,
+    #   ACCESS_MASK            DesiredAccess,
+    #   PLSA_HANDLE            PolicyHandle
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaOpenPolicy,
+      [:plsa_unicode_string, :plsa_object_attributes, :access_mask, :plsa_handle], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaclose
+    # NTSTATUS LsaClose(
+    #   LSA_HANDLE ObjectHandle
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaClose,
+      [:lsa_handle], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsafreememory
+    # NTSTATUS LsaFreeMemory(
+    #   PVOID Buffer
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaFreeMemory,
+      [:pvoid], :ntstatus
+
+    # https://docs.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsantstatustowinerror
+    # ULONG LsaNtStatusToWinError(
+    #   NTSTATUS Status
+    # );
+    ffi_lib :advapi32
+    attach_function_private :LsaNtStatusToWinError,
+      [:ntstatus], :ulong
   end
 end
