@@ -624,5 +624,86 @@ module Puppet::FFI::Windows
     ffi_lib :shlwapi
     attach_function_private :PathIsDirectoryEmptyW,
       [:lpcwstr], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724862(v=vs.85).aspx
+    # LONG WINAPI RegEnumKeyEx(
+    #   _In_         HKEY hKey,
+    #   _In_         DWORD dwIndex,
+    #   _Out_        LPTSTR lpName,
+    #   _Inout_      LPDWORD lpcName,
+    #   _Reserved_   LPDWORD lpReserved,
+    #   _Inout_      LPTSTR lpClass,
+    #   _Inout_opt_  LPDWORD lpcClass,
+    #   _Out_opt_    PFILETIME lpftLastWriteTime
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegEnumKeyExW,
+      [:handle, :dword, :lpwstr, :lpdword, :lpdword, :lpwstr, :lpdword, :pointer], :win32_long
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724865(v=vs.85).aspx
+    # LONG WINAPI RegEnumValue(
+    #   _In_         HKEY hKey,
+    #   _In_         DWORD dwIndex,
+    #   _Out_        LPTSTR lpValueName,
+    #   _Inout_      LPDWORD lpcchValueName,
+    #   _Reserved_   LPDWORD lpReserved,
+    #   _Out_opt_    LPDWORD lpType,
+    #   _Out_opt_    LPBYTE lpData,
+    #   _Inout_opt_  LPDWORD lpcbData
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegEnumValueW,
+      [:handle, :dword, :lpwstr, :lpdword, :lpdword, :lpdword, :lpbyte, :lpdword], :win32_long
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724911(v=vs.85).aspx
+    # LONG WINAPI RegQueryValueExW(
+    #   _In_         HKEY hKey,
+    #   _In_opt_     LPCTSTR lpValueName,
+    #   _Reserved_   LPDWORD lpReserved,
+    #   _Out_opt_    LPDWORD lpType,
+    #   _Out_opt_    LPBYTE lpData,
+    #   _Inout_opt_  LPDWORD lpcbData
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegQueryValueExW,
+      [:handle, :lpcwstr, :lpdword, :lpdword, :lpbyte, :lpdword], :win32_long
+
+    # LONG WINAPI RegDeleteValue(
+    #   _In_      HKEY hKey,
+    #   _In_opt_  LPCTSTR lpValueName
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegDeleteValueW,
+      [:handle, :lpcwstr], :win32_long
+
+    # LONG WINAPI RegDeleteKeyEx(
+    #   _In_        HKEY hKey,
+    #   _In_        LPCTSTR lpSubKey,
+    #   _In_        REGSAM samDesired,
+    #   _Reserved_  DWORD Reserved
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegDeleteKeyExW,
+      [:handle, :lpcwstr, :win32_ulong, :dword], :win32_long
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724902(v=vs.85).aspx
+    # LONG WINAPI RegQueryInfoKey(
+    #   _In_         HKEY hKey,
+    #   _Out_opt_    LPTSTR lpClass,
+    #   _Inout_opt_  LPDWORD lpcClass,
+    #   _Reserved_   LPDWORD lpReserved,
+    #   _Out_opt_    LPDWORD lpcSubKeys,
+    #   _Out_opt_    LPDWORD lpcMaxSubKeyLen,
+    #   _Out_opt_    LPDWORD lpcMaxClassLen,
+    #   _Out_opt_    LPDWORD lpcValues,
+    #   _Out_opt_    LPDWORD lpcMaxValueNameLen,
+    #   _Out_opt_    LPDWORD lpcMaxValueLen,
+    #   _Out_opt_    LPDWORD lpcbSecurityDescriptor,
+    #   _Out_opt_    PFILETIME lpftLastWriteTime
+    # );
+    ffi_lib :advapi32
+    attach_function_private :RegQueryInfoKeyW,
+      [:handle, :lpwstr, :lpdword, :lpdword, :lpdword, :lpdword, :lpdword,
+        :lpdword, :lpdword, :lpdword, :lpdword, :pointer], :win32_long
   end
 end

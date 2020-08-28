@@ -2,18 +2,8 @@ require 'puppet/util/windows'
 
 module Puppet::Util::Windows
   module Registry
-    require 'ffi'
-    extend FFI::Library
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa384129(v=vs.85).aspx
-    KEY64 = 0x100
-    KEY32 = 0x200
-
-    KEY_READ       = 0x20019
-    KEY_WRITE      = 0x20006
-    KEY_ALL_ACCESS = 0x2003f
-
-    ERROR_NO_MORE_ITEMS = 259
+    include Puppet::FFI::Windows::Functions
+    include Puppet::FFI::Windows::Constants
 
     def root(name)
       Win32::Registry.const_get(name)
@@ -110,9 +100,6 @@ module Puppet::Util::Windows
 
     private
 
-    # max number of wide characters including NULL terminator
-    MAX_KEY_CHAR_LENGTH = 255 + 1
-
     def reg_enum_key(key, index, max_key_char_length = MAX_KEY_CHAR_LENGTH)
       subkey, filetime = nil, nil
 
@@ -143,9 +130,6 @@ module Puppet::Util::Windows
 
       [subkey, filetime]
     end
-
-    # max number of wide characters including NULL terminator
-    MAX_VALUE_CHAR_LENGTH = 16383 + 1
 
     def reg_enum_value(key, index, max_value_length = MAX_VALUE_CHAR_LENGTH)
       subkey, type, data = nil, nil, nil
@@ -319,88 +303,5 @@ module Puppet::Util::Windows
 
       result
     end
-
-    ffi_convention :stdcall
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724862(v=vs.85).aspx
-    # LONG WINAPI RegEnumKeyEx(
-    #   _In_         HKEY hKey,
-    #   _In_         DWORD dwIndex,
-    #   _Out_        LPTSTR lpName,
-    #   _Inout_      LPDWORD lpcName,
-    #   _Reserved_   LPDWORD lpReserved,
-    #   _Inout_      LPTSTR lpClass,
-    #   _Inout_opt_  LPDWORD lpcClass,
-    #   _Out_opt_    PFILETIME lpftLastWriteTime
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegEnumKeyExW,
-      [:handle, :dword, :lpwstr, :lpdword, :lpdword, :lpwstr, :lpdword, :pointer], :win32_long
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724865(v=vs.85).aspx
-    # LONG WINAPI RegEnumValue(
-    #   _In_         HKEY hKey,
-    #   _In_         DWORD dwIndex,
-    #   _Out_        LPTSTR lpValueName,
-    #   _Inout_      LPDWORD lpcchValueName,
-    #   _Reserved_   LPDWORD lpReserved,
-    #   _Out_opt_    LPDWORD lpType,
-    #   _Out_opt_    LPBYTE lpData,
-    #   _Inout_opt_  LPDWORD lpcbData
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegEnumValueW,
-      [:handle, :dword, :lpwstr, :lpdword, :lpdword, :lpdword, :lpbyte, :lpdword], :win32_long
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724911(v=vs.85).aspx
-    # LONG WINAPI RegQueryValueExW(
-    #   _In_         HKEY hKey,
-    #   _In_opt_     LPCTSTR lpValueName,
-    #   _Reserved_   LPDWORD lpReserved,
-    #   _Out_opt_    LPDWORD lpType,
-    #   _Out_opt_    LPBYTE lpData,
-    #   _Inout_opt_  LPDWORD lpcbData
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegQueryValueExW,
-      [:handle, :lpcwstr, :lpdword, :lpdword, :lpbyte, :lpdword], :win32_long
-
-    # LONG WINAPI RegDeleteValue(
-    #   _In_      HKEY hKey,
-    #   _In_opt_  LPCTSTR lpValueName
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegDeleteValueW,
-      [:handle, :lpcwstr], :win32_long
-
-    # LONG WINAPI RegDeleteKeyEx(
-    #   _In_        HKEY hKey,
-    #   _In_        LPCTSTR lpSubKey,
-    #   _In_        REGSAM samDesired,
-    #   _Reserved_  DWORD Reserved
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegDeleteKeyExW,
-      [:handle, :lpcwstr, :win32_ulong, :dword], :win32_long
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724902(v=vs.85).aspx
-    # LONG WINAPI RegQueryInfoKey(
-    #   _In_         HKEY hKey,
-    #   _Out_opt_    LPTSTR lpClass,
-    #   _Inout_opt_  LPDWORD lpcClass,
-    #   _Reserved_   LPDWORD lpReserved,
-    #   _Out_opt_    LPDWORD lpcSubKeys,
-    #   _Out_opt_    LPDWORD lpcMaxSubKeyLen,
-    #   _Out_opt_    LPDWORD lpcMaxClassLen,
-    #   _Out_opt_    LPDWORD lpcValues,
-    #   _Out_opt_    LPDWORD lpcMaxValueNameLen,
-    #   _Out_opt_    LPDWORD lpcMaxValueLen,
-    #   _Out_opt_    LPDWORD lpcbSecurityDescriptor,
-    #   _Out_opt_    PFILETIME lpftLastWriteTime
-    # );
-    ffi_lib :advapi32
-    attach_function_private :RegQueryInfoKeyW,
-      [:handle, :lpwstr, :lpdword, :lpdword, :lpdword, :lpdword, :lpdword,
-        :lpdword, :lpdword, :lpdword, :lpdword, :pointer], :win32_long
   end
 end

@@ -400,5 +400,22 @@ module Puppet::FFI::Windows
 
     # https://docs.microsoft.com/en-us/windows/desktop/api/winsvc/ns-winsvc-_enum_service_status_processw
     SERVICENAME_MAX = 256
+
+    # Puppet::Util::Windows::Registry constants
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa384129(v=vs.85).aspx
+    KEY64 = 0x100
+    KEY32 = 0x200
+
+    KEY_READ       = 0x20019
+    KEY_WRITE      = 0x20006
+    KEY_ALL_ACCESS = 0x2003f
+
+    ERROR_NO_MORE_ITEMS = 259
+
+    # max number of wide characters including NULL terminator
+    MAX_KEY_CHAR_LENGTH = 255 + 1
+
+    # max number of wide characters including NULL terminator
+    MAX_VALUE_CHAR_LENGTH = 16383 + 1
   end
 end
