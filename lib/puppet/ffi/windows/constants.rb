@@ -688,5 +688,67 @@ module Puppet::FFI::Windows
     CLSCTX_INPROC = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER
     CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
     CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
+
+    # Puppet::Util::Windows::Security constants
+    # file modes
+    S_IRUSR = 0000400
+    S_IRGRP = 0000040
+    S_IROTH = 0000004
+    S_IWUSR = 0000200
+    S_IWGRP = 0000020
+    S_IWOTH = 0000002
+    S_IXUSR = 0000100
+    S_IXGRP = 0000010
+    S_IXOTH = 0000001
+    S_IRWXU = 0000700
+    S_IRWXG = 0000070
+    S_IRWXO = 0000007
+    S_ISVTX = 0001000
+    S_IEXTRA = 02000000  # represents an extra ace
+    S_ISYSTEM_MISSING = 04000000
+
+    # constants that are missing from Windows::Security
+    PROTECTED_DACL_SECURITY_INFORMATION   = 0x80000000
+    UNPROTECTED_DACL_SECURITY_INFORMATION = 0x20000000
+    NO_INHERITANCE = 0x0
+    SE_DACL_PROTECTED = 0x1000
+
+    SE_BACKUP_NAME              = 'SeBackupPrivilege'
+    SE_DEBUG_NAME               = 'SeDebugPrivilege'
+    SE_RESTORE_NAME             = 'SeRestorePrivilege'
+
+    DELETE                      = 0x00010000
+    READ_CONTROL                = 0x20000
+    WRITE_DAC                   = 0x40000
+    WRITE_OWNER                 = 0x80000
+
+    OWNER_SECURITY_INFORMATION  = 1
+    GROUP_SECURITY_INFORMATION  = 2
+    DACL_SECURITY_INFORMATION   = 4
+
+    FILE_PERSISTENT_ACLS        = 0x00000008
+
+    MASK_TO_MODE = {
+      FILE_GENERIC_READ => S_IROTH,
+      FILE_GENERIC_WRITE => S_IWOTH,
+      (FILE_GENERIC_EXECUTE & ~FILE_READ_ATTRIBUTES) => S_IXOTH
+    }
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379593(v=vs.85).aspx
+    SE_OBJECT_TYPE = enum(
+      :SE_UNKNOWN_OBJECT_TYPE, 0,
+      :SE_FILE_OBJECT,
+      :SE_SERVICE,
+      :SE_PRINTER,
+      :SE_REGISTRY_KEY,
+      :SE_LMSHARE,
+      :SE_KERNEL_OBJECT,
+      :SE_WINDOW_OBJECT,
+      :SE_DS_OBJECT,
+      :SE_DS_OBJECT_ALL,
+      :SE_PROVIDER_DEFINED_OBJECT,
+      :SE_WMIGUID_OBJECT,
+      :SE_REGISTRY_WOW64_32KEY
+    )
   end
 end

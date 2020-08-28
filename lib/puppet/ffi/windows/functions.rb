@@ -1017,5 +1017,142 @@ module Puppet::FFI::Windows
     #   );
     ffi_lib :crypt32
     attach_function_private :CertCloseStore, [:handle, :dword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
+    # HANDLE WINAPI CreateFile(
+    #   _In_      LPCTSTR lpFileName,
+    #   _In_      DWORD dwDesiredAccess,
+    #   _In_      DWORD dwShareMode,
+    #   _In_opt_  LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+    #   _In_      DWORD dwCreationDisposition,
+    #   _In_      DWORD dwFlagsAndAttributes,
+    #   _In_opt_  HANDLE hTemplateFile
+    # );
+    ffi_lib :kernel32
+    attach_function_private :CreateFileW,
+      [:lpcwstr, :dword, :dword, :pointer, :dword, :dword, :handle], :handle
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa364993(v=vs.85).aspx
+    # BOOL WINAPI GetVolumeInformation(
+    #   _In_opt_   LPCTSTR lpRootPathName,
+    #   _Out_opt_  LPTSTR lpVolumeNameBuffer,
+    #   _In_       DWORD nVolumeNameSize,
+    #   _Out_opt_  LPDWORD lpVolumeSerialNumber,
+    #   _Out_opt_  LPDWORD lpMaximumComponentLength,
+    #   _Out_opt_  LPDWORD lpFileSystemFlags,
+    #   _Out_opt_  LPTSTR lpFileSystemNameBuffer,
+    #   _In_       DWORD nFileSystemNameSize
+    # );
+    ffi_lib :kernel32
+    attach_function_private :GetVolumeInformationW,
+      [:lpcwstr, :lpwstr, :dword, :lpdword, :lpdword, :lpdword, :lpwstr, :dword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374951(v=vs.85).aspx
+    # BOOL WINAPI AddAccessAllowedAceEx(
+    #   _Inout_  PACL pAcl,
+    #   _In_     DWORD dwAceRevision,
+    #   _In_     DWORD AceFlags,
+    #   _In_     DWORD AccessMask,
+    #   _In_     PSID pSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :AddAccessAllowedAceEx,
+      [:pointer, :dword, :dword, :dword, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374964(v=vs.85).aspx
+    # BOOL WINAPI AddAccessDeniedAceEx(
+    #   _Inout_  PACL pAcl,
+    #   _In_     DWORD dwAceRevision,
+    #   _In_     DWORD AceFlags,
+    #   _In_     DWORD AccessMask,
+    #   _In_     PSID pSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :AddAccessDeniedAceEx,
+      [:pointer, :dword, :dword, :dword, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446634(v=vs.85).aspx
+    # BOOL WINAPI GetAce(
+    #   _In_   PACL pAcl,
+    #   _In_   DWORD dwAceIndex,
+    #   _Out_  LPVOID *pAce
+    # );
+    ffi_lib :advapi32
+    attach_function_private :GetAce,
+      [:pointer, :dword, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa375202(v=vs.85).aspx
+    # BOOL WINAPI AdjustTokenPrivileges(
+    #   _In_       HANDLE TokenHandle,
+    #   _In_       BOOL DisableAllPrivileges,
+    #   _In_opt_   PTOKEN_PRIVILEGES NewState,
+    #   _In_       DWORD BufferLength,
+    #   _Out_opt_  PTOKEN_PRIVILEGES PreviousState,
+    #   _Out_opt_  PDWORD ReturnLength
+    # );
+    ffi_lib :advapi32
+    attach_function_private :AdjustTokenPrivileges,
+      [:handle, :win32_bool, :pointer, :dword, :pointer, :pdword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/hardware/ff556610(v=vs.85).aspx
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379561(v=vs.85).aspx
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446647(v=vs.85).aspx
+    # typedef WORD SECURITY_DESCRIPTOR_CONTROL, *PSECURITY_DESCRIPTOR_CONTROL;
+    # BOOL WINAPI GetSecurityDescriptorControl(
+    #   _In_   PSECURITY_DESCRIPTOR pSecurityDescriptor,
+    #   _Out_  PSECURITY_DESCRIPTOR_CONTROL pControl,
+    #   _Out_  LPDWORD lpdwRevision
+    # );
+    ffi_lib :advapi32
+    attach_function_private :GetSecurityDescriptorControl,
+      [:pointer, :lpword, :lpdword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa378853(v=vs.85).aspx
+    # BOOL WINAPI InitializeAcl(
+    #   _Out_  PACL pAcl,
+    #   _In_   DWORD nAclLength,
+    #   _In_   DWORD dwAclRevision
+    # );
+    ffi_lib :advapi32
+    attach_function_private :InitializeAcl,
+      [:pointer, :dword, :dword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379142(v=vs.85).aspx
+    # BOOL WINAPI IsValidAcl(
+    #   _In_  PACL pAcl
+    # );
+    ffi_lib :advapi32
+    attach_function_private :IsValidAcl,
+      [:pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446654(v=vs.85).aspx
+    # DWORD WINAPI GetSecurityInfo(
+    #   _In_       HANDLE handle,
+    #   _In_       SE_OBJECT_TYPE ObjectType,
+    #   _In_       SECURITY_INFORMATION SecurityInfo,
+    #   _Out_opt_  PSID *ppsidOwner,
+    #   _Out_opt_  PSID *ppsidGroup,
+    #   _Out_opt_  PACL *ppDacl,
+    #   _Out_opt_  PACL *ppSacl,
+    #   _Out_opt_  PSECURITY_DESCRIPTOR *ppSecurityDescriptor
+    # );
+    ffi_lib :advapi32
+    attach_function_private :GetSecurityInfo,
+      [:handle, SE_OBJECT_TYPE, :dword, :pointer, :pointer, :pointer, :pointer, :pointer], :dword
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379588(v=vs.85).aspx
+    # DWORD WINAPI SetSecurityInfo(
+    #   _In_      HANDLE handle,
+    #   _In_      SE_OBJECT_TYPE ObjectType,
+    #   _In_      SECURITY_INFORMATION SecurityInfo,
+    #   _In_opt_  PSID psidOwner,
+    #   _In_opt_  PSID psidGroup,
+    #   _In_opt_  PACL pDacl,
+    #   _In_opt_  PACL pSacl
+    # );
+    ffi_lib :advapi32
+    # TODO: SECURITY_INFORMATION is actually a bitmask the size of a DWORD
+    attach_function_private :SetSecurityInfo,
+      [:handle, SE_OBJECT_TYPE, :dword, :pointer, :pointer, :pointer, :pointer], :dword
   end
 end

@@ -407,5 +407,65 @@ module Puppet::FFI::Windows
         :hCertStore,         :handle
       )
     end
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374931(v=vs.85).aspx
+    # typedef struct _ACL {
+    #   BYTE AclRevision;
+    #   BYTE Sbz1;
+    #   WORD AclSize;
+    #   WORD AceCount;
+    #   WORD Sbz2;
+    # } ACL, *PACL;
+    class ACL < FFI::Struct
+      layout :AclRevision, :byte,
+             :Sbz1, :byte,
+             :AclSize, :word,
+             :AceCount, :word,
+             :Sbz2, :word
+    end
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374912(v=vs.85).aspx
+    # ACE types
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374919(v=vs.85).aspx
+    # typedef struct _ACE_HEADER {
+    #   BYTE AceType;
+    #   BYTE AceFlags;
+    #   WORD AceSize;
+    # } ACE_HEADER, *PACE_HEADER;
+    class ACE_HEADER < FFI::Struct
+      layout :AceType, :byte,
+             :AceFlags, :byte,
+             :AceSize,  :word
+    end
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374892(v=vs.85).aspx
+    # ACCESS_MASK
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374847(v=vs.85).aspx
+    # typedef struct _ACCESS_ALLOWED_ACE {
+    #   ACE_HEADER  Header;
+    #   ACCESS_MASK Mask;
+    #   DWORD       SidStart;
+    # } ACCESS_ALLOWED_ACE, *PACCESS_ALLOWED_ACE;
+    #
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374879(v=vs.85).aspx
+    # typedef struct _ACCESS_DENIED_ACE {
+    #   ACE_HEADER  Header;
+    #   ACCESS_MASK Mask;
+    #   DWORD       SidStart;
+    # } ACCESS_DENIED_ACE, *PACCESS_DENIED_ACE;
+    class GENERIC_ACCESS_ACE < FFI::Struct
+      # ACE structures must be aligned on DWORD boundaries. All Windows
+      # memory-management functions return DWORD-aligned handles to memory
+      pack 4
+      layout :Header, ACE_HEADER,
+             :Mask, :dword,
+             :SidStart, :dword
+    end
+
+    # https://stackoverflow.com/a/1792930
+    MAXIMUM_SID_BYTES_LENGTH = 68
+    MAXIMUM_GENERIC_ACE_SIZE = GENERIC_ACCESS_ACE.offset_of(:SidStart) +
+                               MAXIMUM_SID_BYTES_LENGTH
   end
 end
