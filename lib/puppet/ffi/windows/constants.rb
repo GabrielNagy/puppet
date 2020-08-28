@@ -445,5 +445,56 @@ module Puppet::FFI::Windows
     FORMAT_MESSAGE_FROM_SYSTEM     = 0x00001000
     FORMAT_MESSAGE_ARGUMENT_ARRAY  = 0x00002000
     FORMAT_MESSAGE_MAX_WIDTH_MASK  = 0x000000FF
+
+    # Puppet::Util::Windows::ADSI constants
+    # https://docs.microsoft.com/en-us/windows/win32/api/dsrole/ne-dsrole-dsrole_machine_role
+    STANDALONE_WORKSTATION = 0
+    MEMBER_WORKSTATION = 1
+    STANDALONE_SERVER = 2
+    MEMBER_SERVER = 3
+    BACKUP_DOMAIN_CONTROLLER = 4
+    PRIMARY_DOMAIN_CONTROLLER = 5
+
+    DOMAIN_ROLES = {
+      STANDALONE_WORKSTATION => :STANDALONE_WORKSTATION,
+      MEMBER_WORKSTATION => :MEMBER_WORKSTATION,
+      STANDALONE_SERVER => :STANDALONE_SERVER,
+      MEMBER_SERVER => :MEMBER_SERVER,
+      BACKUP_DOMAIN_CONTROLLER => :BACKUP_DOMAIN_CONTROLLER,
+      PRIMARY_DOMAIN_CONTROLLER => :PRIMARY_DOMAIN_CONTROLLER,
+    }
+
+    # taken from winbase.h
+    MAX_COMPUTERNAME_LENGTH = 31
+
+    # Declare all of the available user flags on the system. Note that
+    # ADS_UF is read as ADS_UserFlag
+    #   https://docs.microsoft.com/en-us/windows/desktop/api/iads/ne-iads-ads_user_flag
+    # and
+    #   https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro
+    # for the flag values.
+    ADS_USERFLAGS = {
+      ADS_UF_SCRIPT:                                 0x0001,
+      ADS_UF_ACCOUNTDISABLE:                         0x0002,
+      ADS_UF_HOMEDIR_REQUIRED:                       0x0008,
+      ADS_UF_LOCKOUT:                                0x0010,
+      ADS_UF_PASSWD_NOTREQD:                         0x0020,
+      ADS_UF_PASSWD_CANT_CHANGE:                     0x0040,
+      ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED:        0x0080,
+      ADS_UF_TEMP_DUPLICATE_ACCOUNT:                 0x0100,
+      ADS_UF_NORMAL_ACCOUNT:                         0x0200,
+      ADS_UF_INTERDOMAIN_TRUST_ACCOUNT:              0x0800,
+      ADS_UF_WORKSTATION_TRUST_ACCOUNT:              0x1000,
+      ADS_UF_SERVER_TRUST_ACCOUNT:                   0x2000,
+      ADS_UF_DONT_EXPIRE_PASSWD:                     0x10000,
+      ADS_UF_MNS_LOGON_ACCOUNT:                      0x20000,
+      ADS_UF_SMARTCARD_REQUIRED:                     0x40000,
+      ADS_UF_TRUSTED_FOR_DELEGATION:                 0x80000,
+      ADS_UF_NOT_DELEGATED:                          0x100000,
+      ADS_UF_USE_DES_KEY_ONLY:                       0x200000,
+      ADS_UF_DONT_REQUIRE_PREAUTH:                   0x400000,
+      ADS_UF_PASSWORD_EXPIRED:                       0x800000,
+      ADS_UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION: 0x1000000
+    }
   end
 end

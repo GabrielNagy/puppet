@@ -786,5 +786,23 @@ module Puppet::FFI::Windows
     ffi_lib :kernel32
     attach_function_private :FormatMessageW,
       [:dword, :lpcvoid, :dword, :dword, :pointer, :dword, :pointer], :dword
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724295(v=vs.85).aspx
+    # BOOL WINAPI GetComputerName(
+    #   _Out_    LPTSTR lpBuffer,
+    #   _Inout_  LPDWORD lpnSize
+    # );
+    ffi_lib :kernel32
+    attach_function_private :GetComputerNameW,
+      [:lpwstr, :lpdword], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724432(v=vs.85).aspx
+    # BOOL WINAPI GetUserName(
+    #   _Out_    LPTSTR lpBuffer,
+    #   _Inout_  LPDWORD lpnSize
+    # );
+    ffi_lib :advapi32
+    attach_function_private :GetUserNameW,
+      [:lpwstr, :lpdword], :win32_bool
   end
 end

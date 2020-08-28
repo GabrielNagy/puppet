@@ -1,26 +1,10 @@
+require 'puppet/util/windows'
+
 module Puppet::Util::Windows::ADSI
-  require 'ffi'
-
-  # https://docs.microsoft.com/en-us/windows/win32/api/dsrole/ne-dsrole-dsrole_machine_role
-  STANDALONE_WORKSTATION = 0
-  MEMBER_WORKSTATION = 1
-  STANDALONE_SERVER = 2
-  MEMBER_SERVER = 3
-  BACKUP_DOMAIN_CONTROLLER = 4
-  PRIMARY_DOMAIN_CONTROLLER = 5
-
-  DOMAIN_ROLES = {
-    STANDALONE_WORKSTATION => :STANDALONE_WORKSTATION,
-    MEMBER_WORKSTATION => :MEMBER_WORKSTATION,
-    STANDALONE_SERVER => :STANDALONE_SERVER,
-    MEMBER_SERVER => :MEMBER_SERVER,
-    BACKUP_DOMAIN_CONTROLLER => :BACKUP_DOMAIN_CONTROLLER,
-    PRIMARY_DOMAIN_CONTROLLER => :PRIMARY_DOMAIN_CONTROLLER,
-  }
+  extend Puppet::FFI::Windows::Constants
+  extend Puppet::FFI::Windows::Functions
 
   class << self
-    extend FFI::Library
-
     def connectable?(uri)
       begin
         !! connect(uri)
@@ -44,9 +28,6 @@ module Puppet::Util::Windows::ADSI
     def delete(name, resource_type)
       Puppet::Util::Windows::ADSI.connect(computer_uri).Delete(resource_type, name)
     end
-
-    # taken from winbase.h
-    MAX_COMPUTERNAME_LENGTH = 31
 
     def computer_name
       unless @computer_name
@@ -118,23 +99,15 @@ module Puppet::Util::Windows::ADSI
       end
       @domain_role
     end
-
-    ffi_convention :stdcall
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724295(v=vs.85).aspx
-    # BOOL WINAPI GetComputerName(
-    #   _Out_    LPTSTR lpBuffer,
-    #   _Inout_  LPDWORD lpnSize
-    # );
-    ffi_lib :kernel32
-    attach_function_private :GetComputerNameW,
-      [:lpwstr, :lpdword], :win32_bool
   end
 
   # Common base class shared by the User and Group
   # classes below.
   class ADSIObject
     extend Enumerable
+
+    extend Puppet::FFI::Windows::Constants
+    extend Puppet::FFI::Windows::Functions
 
     # Define some useful class-level methods
     class << self
@@ -291,8 +264,6 @@ module Puppet::Util::Windows::ADSI
   end
 
   class User < ADSIObject
-    extend FFI::Library
-
     require 'puppet/util/windows/sid'
 
     # https://msdn.microsoft.com/en-us/library/aa746340.aspx
@@ -406,36 +377,6 @@ module Puppet::Util::Windows::ADSI
       end
     end
 
-    # Declare all of the available user flags on the system. Note that
-    # ADS_UF is read as ADS_UserFlag
-    #   https://docs.microsoft.com/en-us/windows/desktop/api/iads/ne-iads-ads_user_flag
-    # and
-    #   https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro
-    # for the flag values.
-    ADS_USERFLAGS = {
-      ADS_UF_SCRIPT:                                 0x0001,
-      ADS_UF_ACCOUNTDISABLE:                         0x0002,
-      ADS_UF_HOMEDIR_REQUIRED:                       0x0008,
-      ADS_UF_LOCKOUT:                                0x0010,
-      ADS_UF_PASSWD_NOTREQD:                         0x0020,
-      ADS_UF_PASSWD_CANT_CHANGE:                     0x0040,
-      ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED:        0x0080,
-      ADS_UF_TEMP_DUPLICATE_ACCOUNT:                 0x0100,
-      ADS_UF_NORMAL_ACCOUNT:                         0x0200,
-      ADS_UF_INTERDOMAIN_TRUST_ACCOUNT:              0x0800,
-      ADS_UF_WORKSTATION_TRUST_ACCOUNT:              0x1000,
-      ADS_UF_SERVER_TRUST_ACCOUNT:                   0x2000,
-      ADS_UF_DONT_EXPIRE_PASSWD:                     0x10000,
-      ADS_UF_MNS_LOGON_ACCOUNT:                      0x20000,
-      ADS_UF_SMARTCARD_REQUIRED:                     0x40000,
-      ADS_UF_TRUSTED_FOR_DELEGATION:                 0x80000,
-      ADS_UF_NOT_DELEGATED:                          0x100000,
-      ADS_UF_USE_DES_KEY_ONLY:                       0x200000,
-      ADS_UF_DONT_REQUIRE_PREAUTH:                   0x400000,
-      ADS_UF_PASSWORD_EXPIRED:                       0x800000,
-      ADS_UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION: 0x1000000
-    }
-
     def userflag_set?(flag)
       flag_value = ADS_USERFLAGS[flag] || 0
       ! (self['UserFlags'] & flag_value).zero?
@@ -507,17 +448,6 @@ module Puppet::Util::Windows::ADSI
     def self.current_user_sid
       Puppet::Util::Windows::SID.name_to_principal(current_user_name)
     end
-
-    ffi_convention :stdcall
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms724432(v=vs.85).aspx
-    # BOOL WINAPI GetUserName(
-    #   _Out_    LPTSTR lpBuffer,
-    #   _Inout_  LPDWORD lpnSize
-    # );
-    ffi_lib :advapi32
-    attach_function_private :GetUserNameW,
-      [:lpwstr, :lpdword], :win32_bool
   end
 
   class UserProfile
