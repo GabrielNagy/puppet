@@ -962,5 +962,29 @@ module Puppet::FFI::Windows
     ffi_lib :advapi32
     attach_function_private :LookupAccountSidW,
       [:lpcwstr, :pointer, :lpwstr, :lpdword, :lpwstr, :lpdword, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms686615(v=vs.85).aspx
+    # HRESULT CoCreateInstance(
+    #   _In_   REFCLSID rclsid,
+    #   _In_   LPUNKNOWN pUnkOuter,
+    #   _In_   DWORD dwClsContext,
+    #   _In_   REFIID riid,
+    #   _Out_  LPVOID *ppv
+    # );
+    ffi_lib :ole32
+    attach_function_private :CoCreateInstance,
+      [:pointer, :lpunknown, :dword, :pointer, :lpvoid], :hresult
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms678543(v=vs.85).aspx
+    # HRESULT CoInitialize(
+    #   _In_opt_  LPVOID pvReserved
+    # );
+    ffi_lib :ole32
+    attach_function_private :CoInitialize, [:lpvoid], :hresult
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms688715(v=vs.85).aspx
+    # void CoUninitialize(void);
+    ffi_lib :ole32
+    attach_function_private :CoUninitialize, [], :void
   end
 end
