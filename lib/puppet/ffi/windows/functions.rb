@@ -705,5 +705,38 @@ module Puppet::FFI::Windows
     attach_function_private :RegQueryInfoKeyW,
       [:handle, :lpwstr, :lpdword, :lpdword, :lpdword, :lpdword, :lpdword,
         :lpdword, :lpdword, :lpdword, :lpdword, :pointer], :win32_long
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379151(v=vs.85).aspx
+    # BOOL WINAPI IsValidSid(
+    #   _In_  PSID pSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :IsValidSid,
+      [:pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376399(v=vs.85).aspx
+    # BOOL ConvertSidToStringSid(
+    #   _In_   PSID Sid,
+    #   _Out_  LPTSTR *StringSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :ConvertSidToStringSidW,
+      [:pointer, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376402(v=vs.85).aspx
+    # BOOL WINAPI ConvertStringSidToSid(
+    #   _In_   LPCTSTR StringSid,
+    #   _Out_  PSID *Sid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :ConvertStringSidToSidW,
+      [:lpcwstr, :pointer], :win32_bool
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446642(v=vs.85).aspx
+    # DWORD WINAPI GetLengthSid(
+    #   _In_ PSID pSid
+    # );
+    ffi_lib :advapi32
+    attach_function_private :GetLengthSid, [:pointer], :dword
   end
 end

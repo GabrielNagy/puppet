@@ -417,5 +417,13 @@ module Puppet::FFI::Windows
 
     # max number of wide characters including NULL terminator
     MAX_VALUE_CHAR_LENGTH = 16383 + 1
+
+    # Puppet::Util::Windows::SID class constants
+    # missing from Windows::Error
+    ERROR_NONE_MAPPED           = 1332
+    ERROR_INVALID_SID_STRUCTURE = 1337
+
+    # https://stackoverflow.com/a/1792930 - 68 bytes, 184 characters in a string
+    MAXIMUM_SID_STRING_LENGTH = 184
   end
 end

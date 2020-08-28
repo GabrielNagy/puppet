@@ -2,12 +2,8 @@ require 'puppet/util/windows'
 
 module Puppet::Util::Windows
   module SID
-    require 'ffi'
-    extend FFI::Library
-
-    # missing from Windows::Error
-    ERROR_NONE_MAPPED           = 1332
-    ERROR_INVALID_SID_STRUCTURE = 1337
+    extend Puppet::FFI::Windows::Functions
+    extend Puppet::FFI::Windows::Constants
 
     # Well Known SIDs
     Null                        = 'S-1-0'
@@ -146,9 +142,6 @@ module Puppet::Util::Windows
     end
     module_function :sid_to_name
 
-    # https://stackoverflow.com/a/1792930 - 68 bytes, 184 characters in a string
-    MAXIMUM_SID_STRING_LENGTH = 184
-
     # Convert a SID pointer to a SID string, e.g. "S-1-5-32-544".
     def sid_ptr_to_string(psid)
       if ! psid.kind_of?(FFI::Pointer) || IsValidSid(psid) == FFI::WIN32_FALSE
@@ -244,40 +237,5 @@ module Puppet::Util::Windows
         # Indicates that the type of object could not be determined. For example, no object with that SID exists.
         :SidTypeUnknown)
     end
-
-    ffi_convention :stdcall
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379151(v=vs.85).aspx
-    # BOOL WINAPI IsValidSid(
-    #   _In_  PSID pSid
-    # );
-    ffi_lib :advapi32
-    attach_function_private :IsValidSid,
-      [:pointer], :win32_bool
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376399(v=vs.85).aspx
-    # BOOL ConvertSidToStringSid(
-    #   _In_   PSID Sid,
-    #   _Out_  LPTSTR *StringSid
-    # );
-    ffi_lib :advapi32
-    attach_function_private :ConvertSidToStringSidW,
-      [:pointer, :pointer], :win32_bool
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376402(v=vs.85).aspx
-    # BOOL WINAPI ConvertStringSidToSid(
-    #   _In_   LPCTSTR StringSid,
-    #   _Out_  PSID *Sid
-    # );
-    ffi_lib :advapi32
-    attach_function_private :ConvertStringSidToSidW,
-      [:lpcwstr, :pointer], :win32_bool
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa446642(v=vs.85).aspx
-    # DWORD WINAPI GetLengthSid(
-    #   _In_ PSID pSid
-    # );
-    ffi_lib :advapi32
-    attach_function_private :GetLengthSid, [:pointer], :dword
   end
 end
