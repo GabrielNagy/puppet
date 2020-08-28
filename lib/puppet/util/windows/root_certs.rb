@@ -1,13 +1,14 @@
 require 'puppet/util/windows'
 require 'puppet/ssl/openssl_loader'
-require 'ffi'
 
 # Represents a collection of trusted root certificates.
 #
 # @api public
 class Puppet::Util::Windows::RootCerts
+  extend Puppet::FFI::Windows::Functions
+  extend Puppet::FFI::Windows::Structs
+
   include Enumerable
-  extend FFI::Library
 
   def initialize(roots)
     @roots = roots
@@ -53,56 +54,4 @@ class Puppet::Util::Windows::RootCerts
 
     certs
   end
-
-  ffi_convention :stdcall
-  # typedef void *HCERTSTORE;
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa377189(v=vs.85).aspx
-  # typedef struct _CERT_CONTEXT {
-  #   DWORD      dwCertEncodingType;
-  #   BYTE       *pbCertEncoded;
-  #   DWORD      cbCertEncoded;
-  #   PCERT_INFO pCertInfo;
-  #   HCERTSTORE hCertStore;
-  # } CERT_CONTEXT, *PCERT_CONTEXT;typedef const CERT_CONTEXT *PCCERT_CONTEXT;
-  class CERT_CONTEXT < FFI::Struct
-    layout(
-      :dwCertEncodingType, :dword,
-      :pbCertEncoded,      :pointer,
-      :cbCertEncoded,      :dword,
-      :pCertInfo,          :pointer,
-      :hCertStore,         :handle
-    )
-  end
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376560(v=vs.85).aspx
-  # HCERTSTORE
-  # WINAPI
-  # CertOpenSystemStoreA(
-  #   __in_opt HCRYPTPROV_LEGACY hProv,
-  #   __in LPCSTR szSubsystemProtocol
-  #   );
-  # typedef ULONG_PTR HCRYPTPROV_LEGACY;
-  ffi_lib :crypt32
-  attach_function_private :CertOpenSystemStoreA, [:ulong_ptr, :lpcstr], :handle
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376050(v=vs.85).aspx
-  # PCCERT_CONTEXT
-  # WINAPI
-  # CertEnumCertificatesInStore(
-  #   __in HCERTSTORE hCertStore,
-  #   __in_opt PCCERT_CONTEXT pPrevCertContext
-  #   );
-  ffi_lib :crypt32
-  attach_function_private :CertEnumCertificatesInStore, [:handle, :pointer], :pointer
-
-  # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376026(v=vs.85).aspx
-  # BOOL
-  # WINAPI
-  # CertCloseStore(
-  #   __in_opt HCERTSTORE hCertStore,
-  #   __in DWORD dwFlags
-  #   );
-  ffi_lib :crypt32
-  attach_function_private :CertCloseStore, [:handle, :dword], :win32_bool
 end

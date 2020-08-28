@@ -388,5 +388,24 @@ module Puppet::FFI::Windows
         :MaximumLength, :ushort,
         :Buffer, :pwstr
     end
+
+    # typedef void *HCERTSTORE;
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa377189(v=vs.85).aspx
+    # typedef struct _CERT_CONTEXT {
+    #   DWORD      dwCertEncodingType;
+    #   BYTE       *pbCertEncoded;
+    #   DWORD      cbCertEncoded;
+    #   PCERT_INFO pCertInfo;
+    #   HCERTSTORE hCertStore;
+    # } CERT_CONTEXT, *PCERT_CONTEXT;typedef const CERT_CONTEXT *PCCERT_CONTEXT;
+    class CERT_CONTEXT < FFI::Struct
+      layout(
+        :dwCertEncodingType, :dword,
+        :pbCertEncoded,      :pointer,
+        :cbCertEncoded,      :dword,
+        :pCertInfo,          :pointer,
+        :hCertStore,         :handle
+      )
+    end
   end
 end

@@ -986,5 +986,36 @@ module Puppet::FFI::Windows
     # void CoUninitialize(void);
     ffi_lib :ole32
     attach_function_private :CoUninitialize, [], :void
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376560(v=vs.85).aspx
+    # HCERTSTORE
+    # WINAPI
+    # CertOpenSystemStoreA(
+    #   __in_opt HCRYPTPROV_LEGACY hProv,
+    #   __in LPCSTR szSubsystemProtocol
+    #   );
+    # typedef ULONG_PTR HCRYPTPROV_LEGACY;
+    ffi_lib :crypt32
+    attach_function_private :CertOpenSystemStoreA, [:ulong_ptr, :lpcstr], :handle
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376050(v=vs.85).aspx
+    # PCCERT_CONTEXT
+    # WINAPI
+    # CertEnumCertificatesInStore(
+    #   __in HCERTSTORE hCertStore,
+    #   __in_opt PCCERT_CONTEXT pPrevCertContext
+    #   );
+    ffi_lib :crypt32
+    attach_function_private :CertEnumCertificatesInStore, [:handle, :pointer], :pointer
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa376026(v=vs.85).aspx
+    # BOOL
+    # WINAPI
+    # CertCloseStore(
+    #   __in_opt HCERTSTORE hCertStore,
+    #   __in DWORD dwFlags
+    #   );
+    ffi_lib :crypt32
+    attach_function_private :CertCloseStore, [:handle, :dword], :win32_bool
   end
 end
