@@ -337,7 +337,7 @@ describe Puppet::Type.type(:user).provider(:useradd) do
 
     it "should return the local comment string when forcelocal is true" do
       resource[:forcelocal] = true
-      allow(File).to receive(:read).with('/etc/passwd').and_return(content)
+      allow(Puppet::FileSystem).to receive(:each_line).with('/etc/passwd').and_yield(content)
       expect(provider.comment).to eq('local comment')
     end
 
@@ -350,7 +350,7 @@ describe Puppet::Type.type(:user).provider(:useradd) do
   end
 
   describe "#finduser" do
-    before { allow(File).to receive(:read).with('/etc/passwd').and_return(content) }
+    before { allow(Puppet::FileSystem).to receive(:each_line).with('/etc/passwd').and_yield(content) }
 
     let(:content) { "sample_account:sample_password:sample_uid:sample_gid:sample_gecos:sample_directory:sample_shell" }
     let(:output) do
@@ -376,7 +376,7 @@ describe Puppet::Type.type(:user).provider(:useradd) do
     end
 
     it "reads the user file only once per resource" do
-      expect(File).to receive(:read).with('/etc/passwd').once
+      expect(Puppet::FileSystem).to receive(:each_line).with('/etc/passwd').once
       5.times { provider.finduser(:account, 'sample_account') }
     end
   end

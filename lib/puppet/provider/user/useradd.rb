@@ -75,17 +75,19 @@ Puppet::Type.type(:user).provide :useradd, :parent => Puppet::Provider::NameServ
   end
 
   def finduser(key, value)
-    passwd_file = "/etc/passwd"
+    passwd_file = '/etc/passwd'
     passwd_keys = [:account, :password, :uid, :gid, :gecos, :directory, :shell]
     index = passwd_keys.index(key)
-    @passwd_content ||= File.read(passwd_file)
-    @passwd_content.each_line do |line|
-      user = line.split(":")
-      if user[index] == value
-        return Hash[passwd_keys.zip(user)]
+
+    unless @users
+      @users = []
+      Puppet::FileSystem.each_line(passwd_file) do |line|
+        user = line.chomp.split(":")
+        @users << Hash[passwd_keys.zip(user)]
       end
     end
-    false
+
+    @users.select { |param| param[key] == value }.first || false
   end
 
   def local_username
@@ -110,17 +112,26 @@ Puppet::Type.type(:user).provide :useradd, :parent => Puppet::Provider::NameServ
   end
 
   def localgroups
-    member_of = []
-    group_file = "/etc/group"
+    group_file = '/etc/group'
+    @groups_of ||= {}
+    user = resource[:name]
 
-    @group_content ||= File.read(group_file)
-    @group_content.each_line do |line|
+    return @groups_of[user] if @groups_of[user]
+
+    @groups_of[user] = []
+
+    unless Puppet::FileSystem.exist?(group_file)
+      raise Puppet::Error.new("Forcelocal set for user resource '#{user}', but #{group_file} does not exist")
+    end
+
+    group_content = Puppet::FileSystem.each_line(group_file) do |line|
       data = line.chomp.split(':')
-      if data.last.split(',').include?(resource[:name])
-        member_of.push(data.first)
+      if data.last.split(',').include?(user)
+        @groups_of[user] << data.first
       end
     end
-    member_of
+
+    @groups_of[user]
   end
 
   def shell=(value)
